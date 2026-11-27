@@ -2,13 +2,18 @@
 
 import asyncio
 import os
+from pathlib import Path
 
 import pytest
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 URL = os.getenv("DATABASE_TEST_URL")
 pytestmark = pytest.mark.skipif(not URL, reason="Set DATABASE_TEST_URL to a migrated test database")
+ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
+HEAD = ScriptDirectory.from_config(Config(str(ALEMBIC_INI))).get_current_head()
 
 
 def test_migrations_and_diagnostic_functions():
@@ -16,9 +21,7 @@ def test_migrations_and_diagnostic_functions():
         engine = create_async_engine(URL)
         try:
             async with engine.connect() as connection:
-                assert (
-                    await connection.scalar(text("SELECT platform.usp_schema_version()")) == "0005"
-                )
+                assert await connection.scalar(text("SELECT platform.usp_schema_version()")) == HEAD
                 assert await connection.scalar(text("SELECT platform.usp_migration_table_exists()"))
                 assert await connection.scalar(text("SELECT platform.usp_database_name()"))
                 assert (

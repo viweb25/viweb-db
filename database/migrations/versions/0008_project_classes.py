@@ -9,7 +9,7 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("ALTER TABLE training_datasets ADD COLUMN classes jsonb NOT NULL DEFAULT '[]'::jsonb")
+    op.execute("ALTER TABLE training_datasets ADD COLUMN classes jsonb NOT NULL DEFAULT '[]'::jsonb")  # noqa: E501
 
 
 def downgrade():
